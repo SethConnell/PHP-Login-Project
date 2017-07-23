@@ -11,9 +11,10 @@
     }
     
     // Checks if password or email is empty.
-    if (isset($_POST["password"]) && isset($_POST["email"])) {
+    if (isset($_POST["name"]) && isset($_POST["password"]) && isset($_POST["email"]) && $_POST["password"] == $_POST["passwordconfirm"]) {
 		$typed_password = $_POST["password"];
 		$typed_email = $_POST["email"];
+		$typed_name = $_POST["name"];
     
     // Hashing (encrypting) password and email for database.
 		$typed_password = password_hash($typed_password, PASSWORD_DEFAULT, ['cost' => 12]);
@@ -41,12 +42,12 @@
 		// Create table.
 		$sql = "CREATE TABLE IF NOT EXISTS usertable(
 		    email text NOT NULL,
-		    password text NOT NULL
+		    password text NOT NULL,
+		    name text NOT NULL
 		)";
 		$send_query($conn, $sql);
 		
 		// Check to see if email already exists.
-		
 		$testsql = mysqli_query($conn, "SELECT * FROM usertable WHERE email = '$typed_email'");
          if(mysqli_num_rows($testsql)>=1)
            {
@@ -54,8 +55,8 @@
            }
          else
             {
-    		$sql = "INSERT INTO usertable (email, password)
-    		VALUES ('$typed_email', '$typed_password');";
+    		$sql = "INSERT INTO usertable (email, password, name)
+    		VALUES ('$typed_email', '$typed_password', '$typed_name');";
     		$send_query($conn, $sql);
     		mysqli_close($conn);
             }
@@ -68,11 +69,18 @@
 <title>Title of the document</title>
 </head>
 <body>
+    <style>
+        *{
+            text-align: center;
+        }
+    </style>
     <h1>Sign Up:</h1>
     <br>
     <form action="Login.php" method="POST">
     Email: <input type="text" name="email"><br>
+    Name: <input type="text" name="name"><br>
     Password: <input type="text" name="password"><br>
+    Confirm Password: <input type="text" name="passwordconfirm"><br>
     <input type="submit">
     </form>
 </body>
