@@ -9,11 +9,15 @@
         }
         header($pageURL);
     }
-    if (isset($_POST["name"])) {
-		$user_password = $_POST["name"];
-		# Hashing the name (I'm going to change it to a password later).
-		$user_password = password_hash($user_password, PASSWORD_DEFAULT, ['cost' => 12]);
-        echo "<h1>Screw you " . $name . "</h1>"; 
+    
+    // Checks if password or email is empty.
+    if (isset($_POST["password"]) && isset($_POST["email"])) {
+		$typed_password = $_POST["password"];
+		$typed_email = $_POST["email"];
+    
+    // Hashing (encrypting) password and email for database.
+		$typed_password = password_hash($typed_password, PASSWORD_DEFAULT, ['cost' => 12]);
+		$typed_email = $typed_email; // update: emails no longer encrypted.
 		$servername = "127.0.0.1";
 		$username = "seth";
 		$password = "sethconnell";
@@ -24,7 +28,6 @@
 		
 		$send_query = function($link, $sql) {
 			if (mysqli_query($link, $sql)){
-			    echo "Query sent successfully.";
 			} else{
 			    echo "ERROR: Could not able to execute $sql. " . mysqli_error($link);
 			}
@@ -34,14 +37,28 @@
 		if ($conn->connect_error) {
 		    die("Connection failed: " . $conn->connect_error);
 		} 
-		$sql = "CREATE TABLE IF NOT EXISTS persons(
-		    name text NOT NULL
+		
+		// Create table.
+		$sql = "CREATE TABLE IF NOT EXISTS usertable(
+		    email text NOT NULL,
+		    password text NOT NULL
 		)";
 		$send_query($conn, $sql);
-		$sql = "INSERT INTO persons (name)
-		VALUES ('$user_password');";
-		$send_query($conn, $sql);
-		mysqli_close($conn);
+		
+		// Check to see if email already exists.
+		
+		$testsql = mysqli_query($conn, "SELECT * FROM usertable WHERE email = '$typed_email'");
+         if(mysqli_num_rows($testsql)>=1)
+           {
+            echo "Error: Account already exists.";
+           }
+         else
+            {
+    		$sql = "INSERT INTO usertable (email, password)
+    		VALUES ('$typed_email', '$typed_password');";
+    		$send_query($conn, $sql);
+    		mysqli_close($conn);
+            }
     }
 ?>
 
@@ -51,8 +68,11 @@
 <title>Title of the document</title>
 </head>
 <body>
+    <h1>Sign Up:</h1>
+    <br>
     <form action="Login.php" method="POST">
-    Name: <input type="text" name="name"><br>
+    Email: <input type="text" name="email"><br>
+    Password: <input type="text" name="password"><br>
     <input type="submit">
     </form>
 </body>
