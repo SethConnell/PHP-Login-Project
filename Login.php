@@ -1,4 +1,9 @@
 <?php
+    // Start the session
+    session_start();
+?>
+
+<?php
     // Force HTTPS for security
     if($_SERVER["HTTPS"] != "on") {
         $pageURL = "Location: https://";
@@ -16,10 +21,11 @@
 		$typed_email = $_POST["email"];
 		$typed_name = $_POST["name"];
     
-    // Hashing (encrypting) password and email for database.
+    // Encrypting password and email for database.
 		$typed_password = password_hash($typed_password, PASSWORD_DEFAULT, ['cost' => 12]);
 		$typed_email = $typed_email; // update: emails no longer encrypted.
 		$servername = "127.0.0.1";
+		// Examples of data for MYSQL database connection.
 		$username = "seth";
 		$password = "sethconnell";
 		$db_name = "DataTest";
@@ -43,7 +49,9 @@
 		$sql = "CREATE TABLE IF NOT EXISTS usertable(
 		    email text NOT NULL,
 		    password text NOT NULL,
-		    name text NOT NULL
+		    name text NOT NULL,
+		    id MEDIUMINT NOT NULL AUTO_INCREMENT,
+		    primary key (id)
 		)";
 		$send_query($conn, $sql);
 		
@@ -58,8 +66,13 @@
     		$sql = "INSERT INTO usertable (email, password, name)
     		VALUES ('$typed_email', '$typed_password', '$typed_name');";
     		$send_query($conn, $sql);
+    		$user_id = mysqli_query($conn, "SELECT id FROM usertable WHERE name='$typed_name'");
+    		$_SESSION['user'] = $user_id;
     		mysqli_close($conn);
             }
+    }
+    if (isset($_SESSION['user'])) {
+        echo "<a href='signout.php'>Logout</a>";
     }
 ?>
 
