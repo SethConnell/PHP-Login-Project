@@ -1,3 +1,5 @@
+#(Sorry, live preview not available)
+
 # PHP Login Project
 This is a basic login page I created to learn more about connecting with databases using PHP.
 It's an extremely basic login setup and is intended for testing purposes only. It's not secure.
